@@ -13,12 +13,46 @@ class App extends React.Component {
     }
   }
 
+  updateScreen = () => {
+    fetch('/api/todos')
+    .then(result => result.json())
+    .then(data => {
+      this.setState(prevState => ({
+        items: data.payload.map(item => ({
+          id:item.id,
+          toDo:item.toDo,
+          complete:item.done
+        }))
+      }))
+    });
+  }
+
+  componentDidMount = () => {
+    this.updateScreen();
+  };
+
+
+
   onChange = (event) => {
     this.setState({term: event.target.value});
   }
 
   onSubmit = (event) => {
     event.preventDefault();
+
+    fetch("/api/todos", {method:"POST",
+     headers:{"Accept":"application/json",
+      "Content-Type":"application/json"},
+       body:JSON.stringify({
+         toDo:this.state.term,
+         complete:false
+       })
+     })
+      .then(response => {
+        console.log(response);
+        return response.json();
+      })
+      .then(data => console.log(data));
     this.setState({
       term: '',
       items: [
@@ -30,18 +64,21 @@ class App extends React.Component {
     })
   }
 
-  onComplete = index => {
-    this.setState(prevState => ({
-      items: [
-        ...prevState.items.slice(0, index), {
-          toDo: prevState.items[index].toDo,
-          complete: !prevState.items[index].complete
-        },
-
-        ...prevState.items.slice(index + 1)
-      ]
-    }));
-  }
+  onComplete = (key, value) => {
+    fetch(`/api/todos/${key}`,
+       {method:"PATCH",
+        headers:{"Accept":"application/json",
+         "Content-Type":"application/json"},
+          body:JSON.stringify({complete:value, id:key})})
+      .then(response => {
+        console.log(response);
+        return response.json();
+      })
+      .then(data => {
+        console.log('data is: '+data);
+        this.updateScreen();
+      });
+  };
 
   render() {
     const style1 = {
@@ -50,13 +87,12 @@ class App extends React.Component {
     return (<div>
       <AppBar title="Title" iconClassNameRight="muidocs-icon-navigation-expand-more"/>
       <form onSubmit={this.onSubmit}>
-        <TextField hintText="Write here" floatingLabelText="This Floats!" value={this.state.term} onChange={this.onChange} /><br />
+        <TextField hintText="Write here" floatingLabelText="This Floats!" value={this.state.term} onChange={this.onChange}/><br/>
 
-         <RaisedButton type="submit" label="Add to do " primary={true} />
+        <RaisedButton type="submit" label="Add to do " primary={true}/>
       </form>
       <List items={this.state.items} onComplete={this.onComplete}/>
-    </div>
-    );
- }
+    </div>);
+  }
 }
 export default App;

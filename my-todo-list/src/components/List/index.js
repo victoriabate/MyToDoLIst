@@ -31,10 +31,10 @@ const list1 = {
 
  return (
     <ul>
-      {props.items.map((item,index) => <li style={{...pad,...list1[item.complete ? 'complete': 'incomplete']}} key={index}>{item.toDo}
-      <RaisedButton style={{...staticStyle,...style[item.complete ? 'complete': 'incomplete']}}
-        onClick={() => props.onComplete(index) } primary={true}>
-      {item.complete ? 'Done' : 'Todo'}</RaisedButton></li>)}
+      {props.items.map((item,index) => <li key={index}> <RaisedButton style={{...staticStyle,...style[item.complete ? 'complete': 'incomplete']}}
+        onClick={() => props.onComplete(item.id, !item.complete) } primary={true}>
+      {item.complete ? 'Done' : 'Todo'}</RaisedButton>{item.toDo}
+      </li>)}
     </ul>
 
  )
